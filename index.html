@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PicToPDF – Convert images to PDF free</title>
+<meta name="description" content="Convert JPG, PNG and WEBP images to one PDF in your browser. Free 3 PDFs per day. Files never leave your device.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+:root{--bg:#f3f5f9;--surface:#fff;--ink:#14203a;--muted:#5a6680;--line:#d9dfeb;--accent:#ffb400;--accent-ink:#14203a;--danger:#c0392b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1424;--surface:#171f35;--ink:#eef1f8;--muted:#9aa6c2;--line:#2a3555;--danger:#ff7b6b}}
+:root[data-theme="dark"]{--bg:#0e1424;--surface:#171f35;--ink:#eef1f8;--muted:#9aa6c2;--line:#2a3555;--danger:#ff7b6b}
+html{scroll-padding-top:env(safe-area-inset-top,0px);color-scheme:light dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Bricolage Grotesque',system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.55}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:center;padding:8px 0 24px}
+.logo{font-weight:800;font-size:22px;letter-spacing:-.5px}
+.logo b{background:var(--accent);color:var(--accent-ink);padding:0 6px;border-radius:5px;margin-left:2px}
+nav a{color:var(--muted);text-decoration:none;margin-left:16px;font-weight:600;font-size:15px}
+h1{font-size:clamp(32px,7vw,54px);line-height:1.05;margin:0 0 12px;letter-spacing:-1.5px;font-weight:800}
+.sub{color:var(--muted);font-size:18px;margin:0 0 24px;max-width:56ch}
+.drop{border:2px dashed var(--line);background:var(--surface);border-radius:16px;padding:36px 16px;text-align:center;cursor:pointer;transition:border-color .15s}
+.drop.over,.drop:hover{border-color:var(--accent)}
+.drop strong{display:block;font-size:20px}
+.drop span{color:var(--muted);font-size:14px}
+button,.btn{font:inherit;font-weight:700;border:0;border-radius:10px;padding:12px 20px;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);padding:6px 10px;font-size:14px;font-weight:600}
+button:disabled{opacity:.5;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:20px 0}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px}
+.thumb{height:120px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--bg);border-radius:8px}
+.thumb img{max-width:100%;max-height:100%;transition:transform .2s}
+.row{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.opts{display:flex;gap:12px;flex-wrap:wrap;align-items:end;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+label{font-size:13px;color:var(--muted);font-weight:600;display:block}
+select{font:inherit;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.bar{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:12px;flex-wrap:wrap}
+.quota{font-weight:600}
+.quota em{font-style:normal;color:var(--danger)}
+section{margin-top:56px}
+h2{font-size:30px;letter-spacing:-.8px;margin:0 0 16px}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.plan{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.plan.best{border:2px solid var(--accent)}
+.price{font-size:34px;font-weight:800;letter-spacing:-1px}
+.price small{font-size:15px;color:var(--muted);font-weight:600}
+.plan ul{padding-left:18px;color:var(--muted);margin:12px 0 16px}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:8px}
+summary{font-weight:700;cursor:pointer}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);max-width:400px;padding:24px}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+footer{margin-top:56px;color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:16px}
+footer a{color:var(--muted);margin-right:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="logo">Pic<b>To</b>PDF</div>
+  <nav><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><button class="ghost" id="auth" style="margin-left:16px">Log in with Google</button></nav>
+</header>
+
+<h1>Turn your photos into one PDF.</h1>
+<p class="sub">Add images, arrange the pages, download. Everything happens on your device, so your files stay private.</p>
+
+<div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose images">
+  <strong>Drop images here or tap to choose</strong>
+  <span>JPG, PNG, WEBP</span>
+  <input id="file" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="opts" id="opts" hidden>
+  <div><label for="size">Page size</label><select id="size"><option value="a4">A4</option><option value="letter">Letter</option><option value="fit">Fit to image</option></select></div>
+  <div><label for="orient">Orientation</label><select id="orient"><option value="p">Portrait</option><option value="l">Landscape</option></select></div>
+  <div><label for="margin">Margin</label><select id="margin"><option value="0">None</option><option value="10" selected>Small</option><option value="20">Large</option></select></div>
+</div>
+
+<div class="bar">
+  <div class="quota" id="quota"></div>
+  <button id="go" disabled>Create PDF</button>
+</div>
+
+<section id="pricing">
+  <h2>Pricing</h2>
+  <div class="plans">
+    <div class="plan"><div>Free</div><div class="price">₹0</div><ul><li>3 PDFs per day</li><li>Unlimited images per PDF</li></ul></div>
+    <div class="plan"><div>Plus</div><div class="price">₹29<small>/month</small></div><ul><li>10 PDFs per day</li><li>Unlimited images per PDF</li></ul><button data-plan="plus">Choose Plus</button></div>
+    <div class="plan best"><div>Pro Monthly</div><div class="price">₹299<small>/month</small></div><ul><li>Unlimited PDFs</li><li>Cancel anytime</li></ul><button data-plan="monthly">Choose Monthly</button></div>
+    <div class="plan"><div>Pro Yearly</div><div class="price">₹2,999<small>/year</small></div><ul><li>Unlimited PDFs</li><li>Save ₹589 a year</li></ul><button data-plan="yearly">Choose Yearly</button></div>
+  </div>
+</section>
+
+<section id="faq">
+  <h2>FAQ</h2>
+  <details><summary>Are my images uploaded?</summary><p>No. The PDF is created in your browser and nothing is sent to a server.</p></details>
+  <details><summary>When does the daily limit reset?</summary><p>At midnight, your local time.</p></details>
+  <details><summary>Which formats work?</summary><p>JPG, PNG and WEBP.</p></details>
+</section>
+
+<footer><a href="#">Privacy Policy</a><a href="#">Terms</a><a href="#">Contact</a>© PicToPDF</footer>
+</div>
+
+<dialog id="dlg"><h3 id="dt" style="margin-top:0"></h3><p id="dp"></p><button id="dc">Close</button></dialog>
+
+<script>
+const SUPABASE_URL='https://pwzbmxtyybgzxgrymmvt.supabase.co',SUPABASE_ANON_KEY='sb_publishable_QdH6ogwBFdR4a8xZ4g1OYw_R7aDrY5Z';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let files=[],user=null,status={pro:false,left:0,limit:3};
+const $=id=>document.getElementById(id);
+const grid=$('grid'),go=$('go');
+function modal(t,p){$('dt').textContent=t;$('dp').textContent=p;$('dlg').showModal()}
+$('dc').onclick=()=>$('dlg').close();
+async function refresh(){
+  const {data:{session}}=await sb.auth.getSession();user=session?session.user:null;
+  $('auth').textContent=user?'Log out':'Log in with Google';
+  if(user){const {data}=await sb.rpc('my_status');if(data)status=data}
+  showQuota();
+}
+function showQuota(){
+  $('quota').innerHTML=!user?'Log in to get 3 free PDFs a day.':status.pro?'Pro active until '+new Date(status.expires).toLocaleDateString():status.left>0?`${status.plan==='plus'?'Plus':'Free'} PDFs left today: ${status.left} of ${status.limit}`:'<em>Daily limit reached.</em> Upgrade for more PDFs.';
+}
+$('auth').onclick=async()=>{
+  if(user){await sb.auth.signOut();user=null;status={pro:false,left:0};showQuota();$('auth').textContent='Log in with Google'}
+  else sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin}});
+};
+sb.auth.onAuthStateChange(()=>refresh());
+function load(list){
+  [...list].filter(f=>/^image\/(jpeg|png|webp)$/.test(f.type)).forEach(f=>{
+    const r=new FileReader();
+    r.onload=()=>{const img=new Image();img.onload=()=>{files.push({name:f.name,url:r.result,img,rot:0});render()};img.src=r.result};
+    r.readAsDataURL(f);
+  });
+}
+function render(){
+  grid.innerHTML='';
+  files.forEach((f,i)=>{
+    const d=document.createElement('div');d.className='item';
+    d.innerHTML=`<div class="thumb"><img src="${f.url}" alt="Page ${i+1}" style="transform:rotate(${f.rot}deg)"></div>
+    <div class="row"><button class="ghost" data-a="l" aria-label="Move earlier">◀</button><button class="ghost" data-a="r" aria-label="Move later">▶</button><button class="ghost" data-a="rot" aria-label="Rotate">⟳</button><button class="ghost" data-a="del" aria-label="Remove">✕</button></div>`;
+    d.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+      const a=b.dataset.a;
+      if(a==='del')files.splice(i,1);
+      else if(a==='rot')f.rot=(f.rot+90)%360;
+      else if(a==='l'&&i>0)[files[i-1],files[i]]=[files[i],files[i-1]];
+      else if(a==='r'&&i<files.length-1)[files[i+1],files[i]]=[files[i],files[i+1]];
+      render();
+    });
+    grid.appendChild(d);
+  });
+  $('opts').hidden=!files.length;
+  go.disabled=!files.length;
+  showQuota();
+}
+function bake(f){
+  const sw=f.rot%180!==0,w=sw?f.img.height:f.img.width,h=sw?f.img.width:f.img.height;
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);
+  x.translate(w/2,h/2);x.rotate(f.rot*Math.PI/180);x.drawImage(f.img,-f.img.width/2,-f.img.height/2);
+  return{data:c.toDataURL('image/jpeg',.92),w,h};
+}
+go.onclick=async()=>{
+  if(!user){modal('Log in first','Log in with Google to use your 3 free PDFs a day.');return}
+  go.disabled=true;go.textContent='Checking…';
+  const {data,error}=await sb.rpc('consume_conversion');
+  if(error||!data||!data.ok){
+    modal('Daily limit reached','You have used all your PDFs for today. Upgrade for a higher limit (Plus ₹29: 10 a day, Pro: unlimited), or come back tomorrow.');
+    go.textContent='Create PDF';go.disabled=false;refresh();return;
+  }
+  go.textContent='Creating…';
+  setTimeout(()=>{
+    try{
+      const {jsPDF}=window.jspdf,size=$('size').value,m=+$('margin').value;
+      let o=$('orient').value,pdf=null;
+      files.forEach((f,i)=>{
+        const b=bake(f);
+        if(size==='fit'){
+          const pw=b.w*.264,ph=b.h*.264,or=pw>ph?'l':'p';
+          if(!pdf)pdf=new jsPDF({orientation:or,unit:'mm',format:[pw,ph]});else pdf.addPage([pw,ph],or);
+          pdf.addImage(b.data,'JPEG',0,0,pw,ph);
+        }else{
+          if(!pdf)pdf=new jsPDF({orientation:o,unit:'mm',format:size});else pdf.addPage(size,o);
+          const W=pdf.internal.pageSize.getWidth()-2*m,H=pdf.internal.pageSize.getHeight()-2*m;
+          const s=Math.min(W/b.w,H/b.h),iw=b.w*s,ih=b.h*s;
+          pdf.addImage(b.data,'JPEG',(pdf.internal.pageSize.getWidth()-iw)/2,(pdf.internal.pageSize.getHeight()-ih)/2,iw,ih);
+        }
+      });
+      pdf.save('pictopdf.pdf');
+    }catch(e){modal('Something went wrong','Could not create the PDF. Try fewer or smaller images.')}
+    go.textContent='Create PDF';go.disabled=false;refresh();
+  },30);
+};
+const drop=$('drop'),inp=$('file');
+drop.onclick=()=>inp.click();
+drop.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();inp.click()}};
+inp.onchange=()=>{load(inp.files);inp.value=''};
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};
+drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');load(e.dataTransfer.files)};
+async function pay(plan){
+  if(!user){modal('Log in first','Log in with Google, then choose a plan.');return}
+  const {data,error}=await sb.functions.invoke('pay',{body:{action:'order',plan}});
+  if(data&&data.error==='already_pro'){modal('You already have Pro','Your Pro plan has unlimited PDFs, so Plus is not needed.');return}
+  if(error||!data||!data.order_id){modal('Payment error','Could not start the payment. Try again.');return}
+  new Razorpay({key:data.key,order_id:data.order_id,amount:data.amount,currency:'INR',name:'PicToPDF',description:'Pro '+plan,prefill:{email:user.email},
+    handler:async r=>{
+      const {data:v}=await sb.functions.invoke('pay',{body:{action:'verify',...r}});
+      modal(v&&v.ok?'Pro activated':'Verification failed',v&&v.ok?'You now have unlimited PDFs.':'If money was deducted, contact support.');
+      refresh();
+    }}).open();
+}
+document.querySelectorAll('[data-plan]').forEach(b=>b.onclick=()=>pay(b.dataset.plan));
+refresh();
+</script>
+</body>
+</html>
