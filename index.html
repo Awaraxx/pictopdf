@@ -89,7 +89,6 @@ footer a{color:var(--muted);margin-right:14px}
 <div class="opts" id="opts" hidden>
   <div><label for="size">Page size</label><select id="size"><option value="a4">A4</option><option value="letter">Letter</option><option value="fit">Fit to image</option></select></div>
   <div><label for="orient">Orientation</label><select id="orient"><option value="p">Portrait</option><option value="l">Landscape</option></select></div>
-  <div><label for="pname">PDF name</label><input id="pname" value="pictopdf" maxlength="60"></div>
   <div><label for="margin">Margin</label><select id="margin"><option value="0">None</option><option value="10" selected>Small</option><option value="20">Large</option></select></div>
 </div>
 
@@ -99,7 +98,7 @@ footer a{color:var(--muted);margin-right:14px}
 </div>
 
 <div id="result" class="res" hidden><strong>PDF ready ✓</strong><p id="rinfo"></p>
-  <div class="row2"><input id="rname" aria-label="PDF name"><span>.pdf</span><button id="rdl">Download again</button><button id="rnew" class="ghost">Make another PDF</button></div></div>
+  <div class="row2"><input id="rname" aria-label="PDF name"><span>.pdf</span><button id="rdl">Download</button><button id="rnew" class="ghost">Make another PDF</button></div></div>
 
 <section id="pricing">
   <h2>Pricing</h2>
@@ -225,13 +224,13 @@ function cleanName(v){return((v||'').trim().replace(/\.pdf$/i,'').replace(/[\\\/
 function dl(){
   if(!lastBlob)return;
   const a=document.createElement('a');a.href=URL.createObjectURL(lastBlob);a.download=cleanName($('rname').value);
-  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  document.body.appendChild(a);a.click();a.remove();$('rdl').textContent='Download again';setTimeout(()=>URL.revokeObjectURL(a.href),4000);
 }
 function finish(pdf,n){
   lastBlob=pdf.output('blob');
-  $('rname').value=cleanName($('pname').value).replace(/\.pdf$/i,'');
-  $('rinfo').textContent='Your PDF is ready ('+n+' page'+(n>1?'s':'')+'). You can rename it and download again. This does not use your daily limit.';
-  $('result').hidden=false;dl();
+  $('rname').value='pictopdf';$('rdl').textContent='Download';
+  $('rinfo').textContent='Your PDF is ready ('+n+' page'+(n>1?'s':'')+'). Rename it if you want, then tap Download. Downloading again does not use your daily limit.';
+  $('result').hidden=false;
   $('result').scrollIntoView({behavior:'smooth',block:'center'});
 }
 $('rdl').onclick=dl;
