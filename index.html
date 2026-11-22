@@ -132,7 +132,7 @@ $('auth').onclick=async()=>{
   if(user){await sb.auth.signOut();user=null;status={pro:false,left:0};showQuota();$('auth').textContent='Log in with Google'}
   else sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin}});
 };
-sb.auth.onAuthStateChange(()=>refresh());
+sb.auth.onAuthStateChange(()=>{setTimeout(refresh,0)});
 function load(list){
   [...list].filter(f=>/^image\/(jpeg|png|webp)$/.test(f.type)).forEach(f=>{
     const r=new FileReader();
